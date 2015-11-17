@@ -1,0 +1,21 @@
+class PieceTest is subclass of Test
+	operations
+	
+		private testCreatePiece: () ==> ()
+			testCreatePiece() == 
+			(
+				dcl p: Piece := new Piece("White","Square",0,0);
+				assertEqual("White",p.getColor());
+				assertEqual("Square",p.getType());
+				assertEqual(0,p.getX());
+				assertEqual(0,p.getY());
+				assertEqual(1,p.getHeight());
+			);
+			
+			public static main: () ==> ()
+				main() ==
+				(
+					new PieceTest().testCreatePiece();
+				);
+		
+end PieceTest

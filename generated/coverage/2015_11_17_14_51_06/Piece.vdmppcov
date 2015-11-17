@@ -1,0 +1,45 @@
+class Piece
+	types
+		public String = seq1 of char;
+		public Color = String
+			inv cl == cl in set ColorValues;
+		public Type = String
+			inv tp == tp in set TypeValues;
+	
+	values
+		public ColorValues : set of String = {"White","Black"};
+		public TypeValues : set of String = {"Square","Circle","Cross"};
+	
+	instance variables
+		private color : Color;
+		private type : Type;
+		private height : nat1 := 1;
+		private x : nat;
+		private y : nat;
+		
+	operations
+		public Piece : Color * Type * nat * nat ==> Piece
+		Piece(cl, tp, xPos, yPos) == (
+			color := cl;
+			type := tp;
+			x := xPos;
+			y := yPos;
+			return self
+		);
+		
+	pure public getColor : () ==> String
+		getColor() == return color;
+	
+	pure public getType : () ==> String
+		getType() == return type;
+		
+	pure public getHeight : () ==> nat1
+		getHeight() == return height;
+		
+	pure public getX : () ==> nat
+		getX() == return x;
+		
+	pure public getY : () ==> nat
+		getY() == return y;
+		
+end Piece
