@@ -22,34 +22,26 @@ class GameTest is subclass of Test
 				dcl sp : set of Piece := {p1,p2,p3};
 				dcl board : Board := new Board(sp);
 				
-				-- Retrieves a piece
 				assertEqual(board.getPiece(0,0), mk_(p1,true));
 				assertEqual(board.getPiece(2,2).#2, false);
-				-- Moving a piece that does not exist
+				
 				assertEqual(false, board.move(5, 5, 1, 1));
-				-- Needs to be replaced because of capture
+				
 				assertEqual(false, board.move(0, 0, 1, 1));
-				-- Needs to be replaced because of capture
 				assertEqual(false, board.move(1, 1, 0, 0));
-				-- Moving a Square Piece ortogonally
 				assertEqual(true, board.move(0, 0, 0, 1));
-				-- Checking the coordinates of the piece
+				
 				assertEqual(0, p1.getX());
 				assertEqual(1, p1.getY());
 				
-				-- Trying to move a Circle Piece ortogonally
 				assertEqual(false, board.move(1, 1, 1, 0));
-				-- Moving a Circle Piece
 				assertEqual(true, board.move(1, 1, 2, 2));
-				-- Cheking the coordinates of the piece
+				
 				assertEqual(2, p2.getX());
 				assertEqual(2, p2.getY());
 				
-				-- Trying to move a Cross Piece not Diagonally or Ortogonally
 				assertEqual(false, board.move(3, 3, 4, 5));
-				-- Trying to move a Cross Piece diagonally outside of range
 				assertEqual(false, board.move(3, 3, 5, 5));
-				-- Trying to move a Cross Piece Diagonally
 				assertEqual(true, board.move(3, 3, 4, 4));
 			);
 			

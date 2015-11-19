@@ -60,4 +60,10 @@ class Piece
 			y := newY;
 		);
 		
+	public addHeight : () ==> ()
+		addHeight() ==
+		(
+			height := height + 1;
+		);
+		
 end Piece
