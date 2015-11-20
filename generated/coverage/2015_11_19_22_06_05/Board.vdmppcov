@@ -5,6 +5,7 @@ values
 -- TODO Define values here
 instance variables
 	public pieces : set of Piece := { };
+	public turn : seq1 of char := "White";
 operations
 	public Board : (set of Piece) ==> Board
 	Board(initialPieces) == (
@@ -21,7 +22,7 @@ operations
 			if not b then return false; 
 			
 			if not checkForPiece(xf,yf) then return movePiece(p,xf,yf);
-			return false;--capturePiece(p,xf,yf);
+			return capturePiece(p,xf,yf);
 		);
 	
 	public movePiece: Piece * nat * nat ==> bool
@@ -37,8 +38,11 @@ operations
 	public capturePiece : Piece * nat * nat ==> bool
 		capturePiece(p, xf, yf) == 
 		(
+			dcl target : Piece := getPiece(xf,yf).#1;
+			
 			if p.getHeight() >= 6 then return false
-			elseif p.getType() = "Square" then return moveSquarePiece(p, xf, yf)
+			elseif target.getColor() = p.getColor() then return false -- same color
+			elseif p.getType() = "Square" then return captureSquarePiece(p, target)
 			elseif p.getType() = "Circle" then return moveCirclePiece(p, xf, yf)
 			elseif p.getType() = "Cross" then return moveCrossPiece(p, xf, yf);
 			return false;
@@ -61,6 +65,19 @@ operations
 		(
 			if not ortogonalMovement(p, xf, yf) and not diagonalMovement(p,xf,yf) then return false;
 			return true;
+		);
+	
+	public captureSquarePiece : Piece * Piece ==> bool
+		captureSquarePiece(p,t) == 
+		(
+			dcl xf : nat := t.getX();
+			dcl yf : nat := t.getY();
+			
+			if not ortogonalMovement(p,xf,yf) then return false;
+			p.addHeight();
+			remove(t);
+			return true;
+			
 		);
 	
 	public ortogonalMovement : Piece * nat * nat ==> bool
@@ -127,5 +144,22 @@ operations
 					if p.getX() = x and p.getY() = y then return mk_(p,true);
 				return mk_(pr, false);
 			);
+			
+		public changeTurn : () ==> ()
+			changeTurn() == 
+			(
+				if turn = "White" then turn := "Black"
+				else turn := "White";
+			);
+			
+		public remove : Piece ==> ()
+			remove (z) ==
+			(
+				dcl nk : set of Piece := { };
+				for all p in set pieces do
+					if p <> z then nk := nk union {p};
+				pieces := nk;
+			);
+		
 		
 end Board

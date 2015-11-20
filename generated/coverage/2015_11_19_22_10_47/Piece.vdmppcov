@@ -1,0 +1,69 @@
+class Piece
+	types
+		public String = seq1 of char;
+		public Color = String
+			inv cl == cl in set ColorValues;
+		public Type = String
+			inv tp == tp in set TypeValues;
+		public X = nat
+			inv x == x in set XValues;
+		public Y = nat
+			inv y == y in set YValues;
+	
+	values
+		public ColorValues : set of String = {"White","Black"};
+		public TypeValues : set of String = {"Square","Circle","Cross"};
+		public XValues : set of nat = {0,...,9};
+		public YValues : set of nat = {0,...,5};
+	
+	instance variables
+		private color : Color;
+		private type : Type;
+		private height : nat1 := 1;
+		private x : X;
+		private y : Y;
+		
+	operations
+		public Piece : Color * Type * X * Y ==> Piece
+		Piece(cl, tp, xPos, yPos) == (
+			color := cl;
+			type := tp;
+			x := xPos;
+			y := yPos;
+			return self
+		);
+		
+	pure public getColor : () ==> String
+		getColor() == return color;
+	
+	pure public getType : () ==> String
+		getType() == return type;
+		
+	pure public getHeight : () ==> nat1
+		getHeight() == return height;
+		
+	pure public getX : () ==> nat
+		getX() == return x;
+		
+	pure public getY : () ==> nat
+		getY() == return y;
+		
+	public setX : nat ==> ()
+		setX(newX) ==
+		(
+			x := newX;
+		);
+		
+	public setY : nat ==> ()
+		setY(newY) ==
+		(
+			y := newY;
+		);
+		
+	public addHeight : () ==> ()
+		addHeight() ==
+		(
+			height := height + 1;
+		);
+		
+end Piece

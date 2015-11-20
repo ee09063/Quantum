@@ -57,32 +57,15 @@ class GameTest is subclass of Test
 				assertEqual(1,p1.getX());
 				assertEqual(1,p1.getY());
 				assertEqual(2,p1.getHeight());
-				-- Check if p2 was removed
+				-- Check if p1 was removed
 				assertEqual({p1,p3}, board.pieces);
 			);
-			
-			private testTurn: () ==> ()
-				testTurn() == 
-				(
-					dcl p1 : Piece := new Piece("White", "Square", 0, 0);
-					dcl p2 : Piece := new Piece("Black", "Circle", 1, 1);
-					dcl p3 : Piece := new Piece("White", "Cross", 3, 3);
-					dcl sp : set of Piece := {p1,p2,p3};
-					dcl board : Board := new Board(sp);
-				
-					assertEqual("White", board.turn);
-					board.changeTurn();
-					assertEqual("Black", board.turn);
-					board.changeTurn();
-					assertEqual("White", board.turn);
-				);
 			
 			public static main: () ==> ()
 				main() ==
 				(
 					new GameTest().testCreatePiece();
 					new GameTest().testMovementOne();
-					new GameTest().testTurn();
 				);
 		
 end GameTest

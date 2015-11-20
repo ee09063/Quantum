@@ -42,8 +42,8 @@ operations
 			if p.getHeight() >= 6 then return false
 			elseif target.getColor() = p.getColor() then return false -- same color
 			elseif p.getType() = "Square" then return captureSquarePiece(p, target)
-			elseif p.getType() = "Circle" then return captureCirclePiece(p, target);
-			return captureCrossPiece(p, target);
+			elseif p.getType() = "Circle" then return moveCirclePiece(p, xf, yf);
+			return moveCrossPiece(p, xf, yf);
 		);
 	
 	public moveSquarePiece : Piece * nat * nat ==> bool
@@ -76,30 +76,6 @@ operations
 			remove(t);
 			return true;
 			
-		);
-		
-	public captureCirclePiece : Piece * Piece ==> bool
-		captureCirclePiece(p, t) == 
-		(
-			dcl xf : nat := t.getX();
-			dcl yf : nat := t.getY();
-			
-			if not diagonalMovement(p,xf,yf) then return false;
-			p.addHeight();
-			remove(t);
-			return true;
-		);
-	
-	public captureCrossPiece : Piece * Piece ==> bool
-		captureCrossPiece(p, t) == 
-		(
-			dcl xf : nat := t.getX();
-			dcl yf : nat := t.getY();
-			
-			if not ortogonalMovement(p,xf,yf) or not diagonalMovement(p, xf, yf) then return false;
-			p.addHeight();
-			remove(t);
-			return true;
 		);
 	
 	public ortogonalMovement : Piece * nat * nat ==> bool
@@ -182,13 +158,6 @@ operations
 					if p <> z then nk := nk union {p};
 				pieces := nk;
 			);
-	
-		public init : () ==> (set of Piece)
-			init() == 
-			(
-				dcl sp : set of Piece := { };
-				
-				return sp;
-			);	
+		
 		
 end Board
