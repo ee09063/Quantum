@@ -6,147 +6,161 @@ values
 instance variables
 	public pieces : set of Piece := { };
 	public turn : seq1 of char := "White";
+	
 operations
 	public Board : (set of Piece) ==> Board
 	Board(initialPieces) == (
 		pieces := initialPieces;
 		return self;
-	);
+	)
+	pre card initialPieces > 0
+	post card pieces = card initialPieces;
 	
 	public move: nat * nat * nat * nat ==> bool
 		move(xi, yi, xf, yf) == 
 		(
 			dcl b : bool := getPiece(xi,yi).#2;
 			dcl p : Piece := getPiece(xi,yi).#1;
+			dcl dx : nat := abs(p.getX()-xf);
+			dcl dy : nat := abs(p.getY()-yf);
 			
 			if not b then return false; 
-			if p.getHeight() >= 6 then return false;
-			if not checkForPiece(xf,yf) then return movePiece(p,xf,yf);
-			return capturePiece(p,xf,yf);
-		);
+			if not checkForPiece(xf,yf) then movePiece(p,xf,yf,dx,dy)
+			else capturePiece(p,xf,yf,dx,dy);
+			return true;
+		)
+		pre xi in set {0,...,9} and xf in set {0,...,9}
+		    and yf in set {0,...,5} and yf in set {0,...,5};
 	
-	public movePiece: Piece * nat * nat ==> bool
-		movePiece(p, xf, yf) == 
+	public movePiece: Piece * nat * nat * nat * nat ==> ()
+		movePiece(p, xf, yf, dx ,dy) == 
 		(
-			if p.getType() = "Square" then return moveSquarePiece(p, xf, yf)
-			elseif p.getType() = "Circle" then return moveCirclePiece(p, xf, yf);
-			return moveCrossPiece(p, xf, yf);
-		);
+			if p.getType() = "Square" then ortogonalMovement(p, xf, yf, dx, dy)
+			elseif p.getType() = "Circle" then diagonalMovement(p, xf, yf, dx ,dy)
+			else moveCrossPiece(p, xf, yf, dx ,dy);
+		)
+		pre p in set pieces
+		    and xf in set {0,...,9}
+		    and yf in set {0,...,5}
+		    and p.getHeight() < 6
+	  post p.getX() = xf
+	       and p.getY() = yf;
 	
-	public capturePiece : Piece * nat * nat ==> bool
-		capturePiece(p, xf, yf) == 
+	public capturePiece : Piece * nat * nat * nat * nat ==> ()
+		capturePiece(p, xf, yf, dx, dy) == 
 		(
 			dcl target : Piece := getPiece(xf,yf).#1;
 			
-			if target.getColor() = p.getColor() then return false -- same color
-			elseif p.getType() = "Square" then return captureSquarePiece(p, target)
-			elseif p.getType() = "Circle" then return captureCirclePiece(p, target);
-			return captureCrossPiece(p, target);
-		);
-	
-	public moveSquarePiece : Piece * nat * nat ==> bool
-		moveSquarePiece(p,xf,yf) == 
-		(
-			return ortogonalMovement(p,xf,yf);
-		);
+			if p.getType() = "Square" then captureSquarePiece(p,target,dx,dy)
+			elseif p.getType() = "Circle" then captureCirclePiece(p,target,dx,dy)
+			else captureCrossPiece(p,target,dx,dy);
+		)
+		pre p in set pieces
+		    and p.getHeight() < 6
+		post card pieces = card pieces~-1;
 		
-	public moveCirclePiece : Piece * nat * nat ==> bool
-		moveCirclePiece(p,xf,yf) == 
+	public moveCrossPiece : Piece * nat * nat * nat * nat ==> ()
+		moveCrossPiece(p,xf,yf, dx, dy) == 
 		(
-			return diagonalMovement(p,xf,yf);
-		);
-		
-	public moveCrossPiece : Piece * nat * nat ==> bool
-		moveCrossPiece(p,xf,yf) == 
-		(
-			if not ortogonalMovement(p, xf, yf) and not diagonalMovement(p,xf,yf) then return false;
-			return true;
-		);
+			if dx = dy then diagonalMovement(p,xf,yf, dx ,dy)
+			else ortogonalMovement(p, xf, yf, dx, dy);
+		)
+		pre p in set pieces
+		    and xf in set {0,...,9}
+		    and yf in set {0,...,5}
+		    and p.getHeight() < 6
+		post p.getX() = xf
+		     and p.getY() = yf;
 	
-	public captureSquarePiece : Piece * Piece ==> bool
-		captureSquarePiece(p,t) == 
+	public captureSquarePiece : Piece * Piece * nat * nat ==> ()
+		captureSquarePiece(p,t,dx,dy) == 
 		(
 			dcl xf : nat := t.getX();
 			dcl yf : nat := t.getY();
 			
-			if not ortogonalMovement(p,xf,yf) then return false;
+			ortogonalMovement(p,xf,yf, dx, dy);
 			p.addHeight();
 			remove(t);
-			return true;
-			
-		);
+		)
+		pre p in set pieces
+		    and t in set pieces
+		    and t.getColor() <> p.getColor()
+		    and p.getHeight() < 6
+		post card pieces = card pieces~-1
+		     and t not in set pieces
+		     and p.getX() = t.getX()
+		     and p.getY() = t.getY();
 		
-	public captureCirclePiece : Piece * Piece ==> bool
-		captureCirclePiece(p, t) == 
+	public captureCirclePiece : Piece * Piece * nat * nat ==> ()
+		captureCirclePiece(p, t, dx ,dy) == 
 		(
 			dcl xf : nat := t.getX();
 			dcl yf : nat := t.getY();
 			
-			if not diagonalMovement(p,xf,yf) then return false;
+			diagonalMovement(p,xf,yf, dx ,dy);
 			p.addHeight();
 			remove(t);
-			return true;
-		);
+		)
+		pre p in set pieces
+		    and t in set pieces
+		    and t.getColor() <> p.getColor()
+		    and p.getHeight() < 6
+		post t not in set pieces
+		     and card pieces = card pieces~-1
+		     and p.getX() = t.getX()
+		     and p.getY() = t.getY();
 	
-	public captureCrossPiece : Piece * Piece ==> bool
-		captureCrossPiece(p, t) == 
+	public captureCrossPiece : Piece * Piece * nat * nat ==> ()
+		captureCrossPiece(p,t,dx,dy) == 
 		(
 			dcl xf : nat := t.getX();
 			dcl yf : nat := t.getY();
 			
-			if not ortogonalMovement(p,xf,yf) and not diagonalMovement(p, xf, yf) then return false;
+			if dx = dy then diagonalMovement(p,xf,yf,dx,dy)
+			else ortogonalMovement(p,xf,yf, dx, dy);
+			
 			p.addHeight();
 			remove(t);
-			return true;
-		);
+		)
+		pre p in set pieces
+		    and t in set pieces
+		    and p.getColor() <> t.getColor()
+		    and p.getHeight() < 6
+		post t not in set pieces
+				 and card pieces = card pieces~-1
+				 and p.getX() = t.getX()
+				 and p.getY() = t.getY();
 	
-	public ortogonalMovement : Piece * nat * nat ==> bool
-		ortogonalMovement(p,xf,yf) == 
+	public ortogonalMovement : Piece * nat * nat * nat * nat ==> ()
+		ortogonalMovement(p,xf,yf,dx,dy) == 
 		(
-			dcl dx : nat := abs(p.getX()-xf);
-			dcl dy : nat := abs(p.getY()-yf);
-			
-			if dx = 0 or dy = 0 then
-			(
-				if dx = 0 then
-				(
-					if dy <= p.getHeight() then
-					(
-						p.setX(xf);
-						p.setY(yf);
-						return true;
-					)
-				)
-				elseif dy = 0 then
-				(
-					if dx <= p.getHeight() then
-					(
-						p.setX(xf);
-						p.setY(yf);
-						return true;
-					)
-				)
-			);
-			return false;
-		);
+			p.setX(xf);
+			p.setY(yf);
+		)
+		pre p in set pieces
+		    and xf in set {0,...,9}
+		    and yf in set {0,...,5}
+		    and p.getHeight() < 6
+		    and (dx = 0 or dy = 0)
+		    and if dx = 0 then dy <= p.getHeight()
+		        else dx <= p.getHeight()
+		post p.getX() = xf
+		     and p.getY() = yf;
 		
-	public diagonalMovement : Piece * nat * nat ==> bool
-		diagonalMovement(p, xf, yf) == 
+	public diagonalMovement : Piece * nat * nat * nat * nat ==> ()
+		diagonalMovement(p, xf, yf, dx, dy) == 
 		(
-			dcl dx : nat := abs(p.getX()-xf);
-			dcl dy : nat := abs(p.getY()-yf);
-			
-			if dx = dy then
-			(
-				if dx <= p.getHeight() then
-				(
-					p.setX(xf);
-					p.setY(yf);
-					return true;
-				)
-			);
-			return false;
-		);
+			p.setX(xf);
+			p.setY(yf);
+		)
+		pre p in set pieces
+		    and xf in set {0,...,9}
+		    and yf in set {0,...,5}
+		    and p.getHeight() < 6
+		    and dx = dy
+		    and dx <= p.getHeight()
+		post p.getX() = xf
+				 and p.getY() = yf;
 		
 		public checkForPiece : nat * nat ==> bool
 		checkForPiece(x,y) == 
@@ -154,7 +168,9 @@ operations
 			for all p in set pieces do
 				if p.getX() = x and p.getY() = y then return true;
 			return false;
-		);
+		)
+		pre x in set {0,...,9}
+		    and y in set {0,...,6};
 		
 		public getPiece : nat * nat ==> Piece * bool
 			getPiece(x,y) == 
@@ -163,14 +179,17 @@ operations
 				for all p in set pieces do
 					if p.getX() = x and p.getY() = y then return mk_(p,true);
 				return mk_(pr, false);
-			);
+			)
+			pre x in set {0,...,9}
+			    and y in set {0,...,5};
 			
 		public changeTurn : () ==> ()
 			changeTurn() == 
 			(
 				if turn = "White" then turn := "Black"
 				else turn := "White";
-			);
+			)
+			post turn <> turn~;
 			
 		public remove : Piece ==> ()
 			remove (z) ==
@@ -179,7 +198,10 @@ operations
 				for all p in set pieces do
 					if p <> z then nk := nk union {p};
 				pieces := nk;
-			);
+			)
+			pre z in set pieces
+			post card pieces = card pieces~ - 1
+			     and z not in set pieces;
 	
 		public init : () ==> (set of Piece)
 			init() == 
@@ -187,6 +209,7 @@ operations
 				dcl sp : set of Piece := { };
 				
 				return sp;
-			);	
+			)
+			post card pieces = 32;
 		
 end Board
