@@ -65,5 +65,11 @@ class Piece
 		(
 			height := height + 1;
 		);
+	
+	public setHeight : nat1 ==> ()
+		setHeight(h) == 
+		(
+			height := h;
+		);
 		
 end Piece

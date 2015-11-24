@@ -40,6 +40,9 @@ class GameTest is subclass of Test
 				-- Cheking the coordinates of the piece
 				assertEqual(2, p2.getX());
 				assertEqual(2, p2.getY());
+				-- Turn p1 into a height 6 tower
+				p2.setHeight(6);
+				assertEqual(false, board.move(2, 2, 1, 1));
 				
 				-- Trying to move a Cross Piece not Diagonally or Ortogonally
 				assertEqual(false, board.move(3, 3, 4, 5));
@@ -47,19 +50,53 @@ class GameTest is subclass of Test
 				assertEqual(false, board.move(3, 3, 5, 5));
 				-- Trying to move a Cross Piece Diagonally
 				assertEqual(true, board.move(3, 3, 4, 4));
-				
-				-- Move p2 to be captured by p1
-				assertEqual(true, board.move(2, 2, 1, 1));
-				-- Move 
-				-- Use p1 to capture p2
-				assertEqual(true, board.move(0, 1, 1, 1));
-				-- Check p1 properties
-				assertEqual(1,p1.getX());
-				assertEqual(1,p1.getY());
-				assertEqual(2,p1.getHeight());
-				-- Check if p2 was removed
-				assertEqual({p1,p3}, board.pieces);
 			);
+			
+			private testCapture : () ==> ()
+				testCapture() == 
+				(
+					dcl p1 : Piece := new Piece("White", "Square", 0, 0);
+					dcl p2 : Piece := new Piece("Black", "Circle", 0, 1);
+					
+					dcl p3 : Piece := new Piece("White", "Circle", 1, 0);
+					dcl p4 : Piece := new Piece("Black", "Square", 2, 1);
+					
+					dcl p5 : Piece := new Piece("White", "Cross", 3, 3);
+					dcl p6 : Piece := new Piece("Black", "Square", 4, 4);
+					
+					dcl sp : set of Piece := {p1,p2,p3,p4,p5,p6};
+					dcl board : Board := new Board(sp);
+					
+					-- Use p1 to try ad capture a piece with the same color, p3
+					assertEqual(false, board.move(0,0,1,0));
+					
+					-- Use p1 to capture p2
+					assertEqual(true, board.move(0, 0, 0, 1));
+					-- Check p1 properties
+					assertEqual(0,p1.getX());
+					assertEqual(1,p1.getY());
+					assertEqual(2,p1.getHeight());
+					-- Check if p2 was removed
+					assertEqual({p1,p3,p4,p5,p6}, board.pieces);
+					
+					-- Use p3 to capture p4
+					assertEqual(true, board.move(1, 0, 2, 1));
+					-- Check p3 properties
+					assertEqual(2,p3.getX());
+					assertEqual(1,p3.getY());
+					assertEqual(2,p3.getHeight());
+					-- Check if p4 was removed
+					assertEqual({p1,p3,p5,p6}, board.pieces);
+					
+					-- Use p5 to capture p6
+					assertEqual(true, board.move(3, 3, 4, 4));
+					-- Check p4 properties
+					assertEqual(4,p5.getX());
+					assertEqual(4,p5.getY());
+					assertEqual(2,p5.getHeight());
+					-- Check if p6 was removed
+					assertEqual({p1,p3,p5}, board.pieces);
+				);
 			
 			private testTurn: () ==> ()
 				testTurn() == 
@@ -73,6 +110,8 @@ class GameTest is subclass of Test
 					assertEqual("White", board.turn);
 					board.changeTurn();
 					assertEqual("Black", board.turn);
+					board.changeTurn();
+					assertEqual("White", board.turn);
 				);
 			
 			public static main: () ==> ()
@@ -80,6 +119,7 @@ class GameTest is subclass of Test
 				(
 					new GameTest().testCreatePiece();
 					new GameTest().testMovementOne();
+					new GameTest().testCapture();
 					new GameTest().testTurn();
 				);
 		

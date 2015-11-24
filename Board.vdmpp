@@ -20,7 +20,7 @@ operations
 			dcl p : Piece := getPiece(xi,yi).#1;
 			
 			if not b then return false; 
-			
+			if p.getHeight() >= 6 then return false;
 			if not checkForPiece(xf,yf) then return movePiece(p,xf,yf);
 			return capturePiece(p,xf,yf);
 		);
@@ -28,8 +28,7 @@ operations
 	public movePiece: Piece * nat * nat ==> bool
 		movePiece(p, xf, yf) == 
 		(
-			if p.getHeight() >= 6 then return false
-			elseif p.getType() = "Square" then return moveSquarePiece(p, xf, yf)
+			if p.getType() = "Square" then return moveSquarePiece(p, xf, yf)
 			elseif p.getType() = "Circle" then return moveCirclePiece(p, xf, yf);
 			return moveCrossPiece(p, xf, yf);
 		);
@@ -39,8 +38,7 @@ operations
 		(
 			dcl target : Piece := getPiece(xf,yf).#1;
 			
-			if p.getHeight() >= 6 then return false
-			elseif target.getColor() = p.getColor() then return false -- same color
+			if target.getColor() = p.getColor() then return false -- same color
 			elseif p.getType() = "Square" then return captureSquarePiece(p, target)
 			elseif p.getType() = "Circle" then return captureCirclePiece(p, target);
 			return captureCrossPiece(p, target);
@@ -96,7 +94,7 @@ operations
 			dcl xf : nat := t.getX();
 			dcl yf : nat := t.getY();
 			
-			if not ortogonalMovement(p,xf,yf) or not diagonalMovement(p, xf, yf) then return false;
+			if not ortogonalMovement(p,xf,yf) and not diagonalMovement(p, xf, yf) then return false;
 			p.addHeight();
 			remove(t);
 			return true;
